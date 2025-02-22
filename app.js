@@ -22,6 +22,8 @@ app.use(cors({
 const salt = await bcrypt.genSalt(10);
 console.log("Salt:", salt);
 
+const PORT = process.env.PORT || 3000;
+
 app.use("/otp", otpRouter);
 app.use("/auth", authRouter);
 app.use('/eventcard',eventcardRouter);
@@ -29,6 +31,6 @@ app.get("/", (req, res) => {
   res.send("Backend is running successfully! 🚀");
 });
 
-app.listen(3002, () => {
-  console.log("Server is running on port 3002");
+app.listen(PORT, () => {
+  console.log(`Server is running on ${PORT}`);
 });
