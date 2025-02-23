@@ -11,8 +11,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const cors = require("cors");
-
 app.use(cors({
   origin: ["https://techsphere-sigma.vercel.app", "http://localhost:3000"], // Allow frontend and local dev
   credentials: true,
