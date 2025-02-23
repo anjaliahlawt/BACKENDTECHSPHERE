@@ -11,13 +11,15 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({
-  origin: "https://techsphere-sigma.vercel.app/", 
-  credentials: true, 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+const cors = require("cors");
 
+app.use(cors({
+  origin: ["https://techsphere-sigma.vercel.app", "http://localhost:3000"], // Allow frontend and local dev
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Set-Cookie"]
+}));
 
 const salt = await bcrypt.genSalt(10);
 console.log("Salt:", salt);
