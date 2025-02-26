@@ -12,6 +12,8 @@ const getEvents = async (req, res) => {
       size = 10,
     } = req.query;
 
+    console.log("eventController: getEvents API called");
+
     const filter = {};
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -19,14 +21,14 @@ const getEvents = async (req, res) => {
     console.log("Received query:", req.query);
     console.log("Today (UTC):", today);
 
-    
+    // Ensure 'start' is compared as a Date
     if (view === "upcoming") {
       filter.start = { $gte: today };
     } else if (view === "past") {
       filter.start = { $lt: today };
-    } else if (view === "all") {
-      filter.start = { $exists: true };
     }
+
+    console.log("Applying date filter:", filter);
 
     if (isFree === "true") {
       filter.prize = "Free";
@@ -38,47 +40,39 @@ const getEvents = async (req, res) => {
       filter.duration = duration;
     }
 
-
     const totalEventsInDatabase = await EventCard.countDocuments({});
-
-   
     const totalFilteredEvents = await EventCard.countDocuments(filter);
 
-    
     let query = EventCard.find(filter);
 
     const sortFields = {
-      date: { start: -1 },
+      date: { start: 1 },
       location: { location: 1 },
       duration: { duration: 1 },
       prize: { prize: 1 },
     };
+
     if (sortBy && sortFields[sortBy]) {
       query = query.sort(sortFields[sortBy]);
-    } else {
-      query = query.sort({ start: -1 });
     }
 
-   
-    const pageNumber = Number(page) || 1;
-    const pageSize = Number(size) || 10;
+    const pageNumber = Number(page);
+    const pageSize = Number(size);
     query = query.skip((pageNumber - 1) * pageSize).limit(pageSize);
 
-    const events = await query.lean();
+    const events = await query.exec();
 
     res.json({
       events,
-      totalEvents: totalEventsInDatabase, 
-      totalFilteredEvents, 
-      totalPages: Math.ceil(totalEventsInDatabase / pageSize), 
+      totalEvents: totalEventsInDatabase,
+      totalFilteredEvents,
+      totalPages: Math.ceil(totalEventsInDatabase / pageSize),
       currentPage: pageNumber,
       pageSize,
     });
   } catch (error) {
     console.error("❌ Server Error:", error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
 
