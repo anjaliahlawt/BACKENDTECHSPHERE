@@ -21,14 +21,11 @@ const getEvents = async (req, res) => {
     console.log("Received query:", req.query);
     console.log("Today (UTC):", today);
 
-    // Ensure 'start' is compared as a Date
     if (view === "upcoming") {
       filter.start = { $gte: today };
     } else if (view === "past") {
       filter.start = { $lt: today };
     }
-
-    console.log("Applying date filter:", filter);
 
     if (isFree === "true") {
       filter.prize = "Free";
@@ -72,7 +69,9 @@ const getEvents = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Server Error:", error);
-    res.status(500).json({ error: "Internal Server Error", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 };
 
