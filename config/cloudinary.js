@@ -5,23 +5,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Cloudinary Configuration
+// Cloudinary Config
 cloudinary.v2.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-// Multer-Cloudinary Storage
+// Storage setup for Multer
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
-    folder: "event_images", // Cloudinary folder name
+    folder: "event_images", // Images will be stored in this Cloudinary folder
     allowedFormats: ["jpg", "png", "jpeg"],
   },
 });
 
-// Multer Upload Middleware
+// Upload Middleware
 const upload = multer({ storage });
 
 export { cloudinary, upload };

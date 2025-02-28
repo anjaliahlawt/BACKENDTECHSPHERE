@@ -8,7 +8,7 @@ const eventcardSchema = new mongoose.Schema(
     duration: String,
     prize: String,
     imageBg: String,
-    image:String,
+    imageUrl:String,
   },
   {
     timestamps: true,

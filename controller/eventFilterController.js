@@ -15,7 +15,7 @@ const getEvents = async (req, res) => {
     console.log("eventController: getEvents API called");
 
     const filter = {};
-    const today = new Date();
+    const today =  Date.now();
     today.setUTCHours(0, 0, 0, 0);
 
     console.log("Received query:", req.query);
