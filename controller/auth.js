@@ -2,6 +2,7 @@ import User from "../model/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import EventCard from "../model/eventcardModel.js";
 import { createOtp } from "./otp.js";
 dotenv.config();
 
@@ -56,7 +57,7 @@ const login = async (req, res) => {
   
   res.cookie("token", token, {
     httpOnly: true, 
-     secure:false,
+    secure:false,
     sameSite: "lax", 
     maxAge: 60 * 60 * 1000, 
   });
@@ -79,10 +80,82 @@ const getUserProfile = async (req, res) => {
       return res.status(404).json({ status: "fail", message: "User not found" });
     }
 
-    res.status(200).json({ status: "success", message: "Profile data accessed", user });
+    res.status(200).json({
+      success: true,
+      message: "Profile data accessed",
+      userId: user._id, 
+      user,
+    });
   } catch (error) {
     return res.status(403).json({ status: "fail", message: "Invalid or expired token" });
   }
 };
 
-export { signup, login, getUserProfile };
+// Bookmark an event
+const bookmarkEvent = async (req, res) => {
+  try {
+    const { userId, eventId } = req.params; 
+    console.log("User ID:", userId, "Event ID:", eventId);
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.bookmarkedEvents.includes(eventId)) {
+      user.bookmarkedEvents.push(eventId);
+      await user.save();
+      return res.json({ message: "Event bookmarked successfully", bookmarks: user.bookmarkedEvents });
+    }
+
+    res.json({ message: "Event already bookmarked", bookmarks: user.bookmarkedEvents });
+  } catch (err) {
+    console.error("Error in bookmarkEvent:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};
+
+
+// Get all bookmarked events
+const getBookmarkedEvents = async (req, res) => {
+  try {
+    const { userId } = req.params;  
+    console.log("Fetching bookmarks for User ID:", userId);  
+
+    const user = await User.findById(userId).populate("bookmarkedEvents");
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ bookmarks: user.bookmarkedEvents });
+  } catch (err) {
+    console.error("Error fetching bookmarks:", err);  
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};
+const getUserDashboard = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentDate = new Date();
+
+    const user = await User.findById(userId).populate("bookmarkedEvents");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Convert stored string dates to Date while querying
+    const pastEvents = await EventCard.find({
+      $expr: { $lt: [{ $toDate: "$start" }, currentDate] },
+    });
+
+    res.json({
+      bookmarks: user.bookmarkedEvents,
+      pastEvents: pastEvents,
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};
+
+
+export { signup, login, getUserProfile,bookmarkEvent,getBookmarkedEvents,getUserDashboard };

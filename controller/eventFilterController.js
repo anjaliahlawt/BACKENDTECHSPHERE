@@ -12,14 +12,8 @@ const getEvents = async (req, res) => {
       size = 10,
     } = req.query;
 
-    console.log("eventController: getEvents API called");
-
     const filter = {};
-    const today =  Date.now();
-    today.setUTCHours(0, 0, 0, 0);
-
-    console.log("Received query:", req.query);
-    console.log("Today (UTC):", today);
+    const today = new Date(); 
 
     if (view === "upcoming") {
       filter.start = { $gte: today };
@@ -57,10 +51,10 @@ const getEvents = async (req, res) => {
     const pageSize = Number(size);
     query = query.skip((pageNumber - 1) * pageSize).limit(pageSize);
 
-    const events = await query.exec();
+    const events = await query.exec(); 
 
     res.json({
-      events,
+      events, 
       totalEvents: totalEventsInDatabase,
       totalFilteredEvents,
       totalPages: Math.ceil(totalEventsInDatabase / pageSize),

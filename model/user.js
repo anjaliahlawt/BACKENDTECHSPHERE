@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   verified: { type: Boolean, default: false }, 
+  bookmarkedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "eventcards" }]
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
